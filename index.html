@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+        <link rel="stylesheet" href="style.css" />
+        <script src="script.js" defer></script>
+    </head>
+    <body onload="startTime()">
+        <header class="container" id="date">
+            <p><strong>10:10</strong></p>
+            <p>1 april 2024</p>
+        </header>
+        <main>
+            <h1 contenteditable="true">John Doe Dashboard</h1>
+            <section class="content">
+                <div class="container">
+                    <h2>Snabblänkar</h2>
+                    <div class="inner">
+                        <img src="./images/google.png" alt="Google logo" />
+                        <p>Google</p>
+                    </div>
+                    <div class="inner">
+                        <img src="./images/notion.png" alt="Notion logo" />
+                        <p>Notion</p>
+                    </div>
+                    <button id="link-btn">Lägg till länk</button>
+                </div>
+                <div class="container">
+                    <h2>Dagens väder</h2>
+                </div>
+                <div class="container">
+                    <h2>[...]</h2>
+                </div>
+                <div class="container">
+                    <h2>Anteckningar</h2>
+                    <textarea name="" class="inner" id=""></textarea>
+                </div>
+            </section>
+            <div class="background"></div>
+        </main>
+        <footer>
+            <button id="bg-btn">
+                <p class="icon">&#10227;</p>
+                Slumpa ny bakgrund
+            </button>
+        </footer>
+    </body>
+</html>
