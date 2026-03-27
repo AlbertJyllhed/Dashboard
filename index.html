@@ -12,26 +12,29 @@
         ></script>
     </head>
     <body onload="startTime()">
-        <header class="container" id="date">
-            <p><strong>10:10</strong></p>
-            <p>1 april 2024</p>
-        </header>
+        <header class="container" id="date"></header>
         <main>
             <h1 contenteditable="true">John Doe Dashboard</h1>
-            <section class="content">
+            <section class="flex-row">
                 <div class="container">
                     <h2>Snabblänkar</h2>
                     <div class="inner-content" id="quick-links"></div>
-                    <button id="link-btn">
+                    <button class="bottom-btn" id="link-btn">
                         <i class="fa-solid fa-circle-plus"></i>Lägg till länk
                     </button>
                 </div>
                 <div class="container">
                     <h2>Dagens väder</h2>
                     <div class="inner-content" id="weather"></div>
+                    <div class="loader"></div>
                 </div>
                 <div class="container">
-                    <h2>[...]</h2>
+                    <h2>Humorlådan</h2>
+                    <div class="inner-content" id="joke"></div>
+                    <button class="bottom-btn" id="joke-btn">
+                        <i class="fa-solid fa-face-laugh"></i>
+                        Nytt skämt
+                    </button>
                 </div>
                 <div class="container">
                     <h2>Anteckningar</h2>
@@ -39,6 +42,26 @@
                 </div>
             </section>
             <div class="background"></div>
+            <dialog id="link-dialog">
+                <h3>Lägg till länk</h3>
+                <form method="dialog" id="dialog-form">
+                    <input
+                        type="text"
+                        id="dialog-url"
+                        placeholder="URL"
+                        autofocus
+                        required
+                    />
+                    <input
+                        type="text"
+                        id="dialog-link-title"
+                        placeholder="Namn"
+                        required
+                    />
+                    <button type="submit">Lägg till länk</button>
+                </form>
+                <i class="fa-solid fa-circle-xmark" id="close-dialog-btn"></i>
+            </dialog>
         </main>
         <footer>
             <button id="bg-btn">
