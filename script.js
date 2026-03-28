@@ -11,12 +11,12 @@ const timeElement = document.getElementById("date");
 
 //header
 const titleElement = document.querySelector("h1");
-const title = titleElement.textContent;
 
 // quick links
 const linkButton = document.getElementById("link-btn");
 const quickLinksElement = document.getElementById("quick-links");
 const loaderElement = document.querySelector(".loader");
+
 // quick links dialog
 const linkDialog = document.getElementById("link-dialog");
 const dialogForm = document.getElementById("dialog-form");
@@ -46,12 +46,40 @@ const jokeElement = document.getElementById("joke");
 
 // notes
 const notesElement = document.querySelector("textarea");
-let note = "";
 
 // background
 const backgroundButton = document.getElementById("bg-btn");
 const backgroundElement = document.querySelector(".background");
 
+// initialize dashboard with saved settings and start clock
+function init() {
+    startTime();
+
+    titleElement.textContent =
+        localStorage.getItem("title") || "John Doe Dashboard";
+
+    const savedLinks = JSON.parse(localStorage.getItem("quickLinks")) || [];
+    savedLinks.forEach((link) => {
+        createQuickLinkElement(link.url, link.title);
+    });
+
+    navigator.geolocation.getCurrentPosition(
+        createWeatherElements,
+        (error) => console.error("Geolocation error", error),
+        {
+            enableHighAccuracy: false,
+        },
+    );
+
+    notesElement.value = localStorage.getItem("note");
+
+    const storedBackground =
+        localStorage.getItem("background") ||
+        "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600";
+    setBackground(storedBackground);
+}
+
+// clock function to update time every second and format date
 function startTime() {
     const today = new Date();
     let h = today.getHours();
@@ -68,6 +96,7 @@ function startTime() {
     setTimeout(startTime, 1000);
 }
 
+// add zero in front of numbers < 10 for clock formatting
 function checkTime(i) {
     if (i < 10) {
         // add zero in front of numbers < 10)
@@ -93,11 +122,33 @@ function createQuickLinkElement(inputURL, inputTitle) {
     const innerContentElement = document.createElement("div");
     innerContentElement.classList.add("inner-container");
 
+    const closeButton = document.createElement("i");
+    closeButton.classList.add("fa-solid", "fa-circle-minus");
+    closeButton.addEventListener("click", () => {
+        quickLinksElement.removeChild(innerContentElement);
+        removeQuickLink(url.href, inputTitle);
+    });
+
     // add content to inner container except remove button
     innerContentElement.innerHTML = `<img src="${getFavicon(url, 180)}" alt="Website logo" />
     <a href="${url}" target="_blank">${inputTitle}</a>`;
 
+    innerContentElement.appendChild(closeButton);
     quickLinksElement.appendChild(innerContentElement);
+}
+
+// Save quick link to localStorage
+function saveQuickLink(url, title) {
+    const links = JSON.parse(localStorage.getItem("quickLinks")) || [];
+    links.push({ url, title });
+    localStorage.setItem("quickLinks", JSON.stringify(links));
+}
+
+// Remove quick link from localStorage
+function removeQuickLink(url, title) {
+    let links = JSON.parse(localStorage.getItem("quickLinks")) || [];
+    links = links.filter((link) => !(link.url === url && link.title === title));
+    localStorage.setItem("quickLinks", JSON.stringify(links));
 }
 
 // get weather data based on code from api and return correct icon and description
@@ -154,6 +205,7 @@ function createWeatherElements(pos) {
     loaderElement.style.display = "none";
 }
 
+// get joke from api and display it
 function setJoke() {
     getData(jokeURL).then((result) => {
         if (result.type === "single") {
@@ -199,17 +251,23 @@ function getImageBrightness(url, callback) {
     };
 }
 
+// set background image either from unsplash api or localstorage
+function setBackground(backgroundImage) {
+    backgroundElement.style.backgroundImage = `url(${backgroundImage})`;
+    getImageBrightness(backgroundImage, (brightness) => {
+        console.log("Brightness:", brightness);
+        brightness < 128
+            ? (titleElement.style.color = "white")
+            : (titleElement.style.color = "black");
+    });
+    localStorage.setItem("background", backgroundImage);
+}
+
 // set random background image from unsplash api
 function setRandomBackground() {
     const url = `${unsplashURL}photos/random/?client_id=${unsplashKey}`;
     getData(url).then((result) => {
-        backgroundElement.style.backgroundImage = `url(${result.urls.full})`;
-        getImageBrightness(result.urls.full, (brightness) => {
-            console.log("Brightness:", brightness);
-            brightness < 128
-                ? (titleElement.style.color = "white")
-                : (titleElement.style.color = "black");
-        });
+        setBackground(result.urls.full);
     });
 }
 
@@ -222,18 +280,16 @@ async function getData(url) {
             throw new Error("Could not fetch image: " + response.statusText);
         }
         const data = await response.json();
-        console.log(data.urls.raw);
-
-        backgroundElement.innerHTML = `<img src="${data.urls.raw}" alt="Background image" />`;
+        console.log(data);
+        return data;
     } catch (error) {
-        console.log(error);
+        throw error;
     }
 }
 
 // event listeners
-titleElement.addEventListener("change", () => {
-    title = titleElement.textContent;
-    console.log(title);
+titleElement.addEventListener("input", () => {
+    localStorage.setItem("title", titleElement.textContent);
 });
 linkButton.addEventListener("click", () => {
     linkDialog.showModal();
@@ -242,6 +298,7 @@ dialogForm.addEventListener("submit", (e) => {
     e.preventDefault();
     if (isLinkValid(dialogURLInput.value)) {
         createQuickLinkElement(dialogURLInput.value, dialogTitleInput.value);
+        saveQuickLink(dialogURLInput.value, dialogTitleInput.value);
         dialogTitleInput.value = "";
         dialogURLInput.value = "";
     }
@@ -254,17 +311,9 @@ jokeButton.addEventListener("click", () => {
     setJoke();
 });
 notesElement.addEventListener("change", () => {
-    note = notesElement.value;
-    console.log(note);
+    localStorage.setItem("note", notesElement.value);
 });
 backgroundButton.addEventListener("click", setRandomBackground);
 
 // auto functions
-navigator.geolocation.getCurrentPosition(
-    createWeatherElements,
-    (error) => console.error("Geolocation error", error),
-    {
-        enableHighAccuracy: false,
-    },
-);
-setRandomBackground();
+init();
